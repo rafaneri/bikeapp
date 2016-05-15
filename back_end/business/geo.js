@@ -2,6 +2,7 @@ var geocoderProvider = 'openstreetmap';
 var httpAdapter = 'http';
 var geocoder = require('node-geocoder')(geocoderProvider, httpAdapter);
 var Q = require('q');
+var tokml = require('../util/tokml');
 
 function searchAddress(a) {
     var deferred = Q.defer();
@@ -13,6 +14,10 @@ function searchAddress(a) {
         }
     });
     return deferred.promise;
+}
+
+function downloadKML(geojson) {
+    return tokml(geojson);
 }
 
 module.exports = {searchAddress: searchAddress};

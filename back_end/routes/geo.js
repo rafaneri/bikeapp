@@ -13,8 +13,20 @@ module.exports = function() {
             }, function(err) {
                 next(err);
             })
+        },
+        downloadKML: function(req, res, next) {
+            var geojson = req.body;
+            
+            geo.downloadKML(geojson).then(function(result) {
+                res.json(result);
+            }, function(err) {
+                next(err);
+            })
         }
     };
+    
+    r.router.route('/kml')
+        .post(r.downloadKML);
     
     r.router.route('/geo/:a')
         .get(r.searchAddress);
