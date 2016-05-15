@@ -10,15 +10,16 @@ RideController.$inject = ['$scope',
         '$ionicPopup',
         'leafletData',
         'ApplicationService',
+        'GeoService',
         'MessageService',
         'StorageService'];
         
-function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicModal, $ionicPopup, leafletData, ApplicationService, MessageService, StorageService) {
+function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicModal, $ionicPopup, leafletData, ApplicationService, GeoService, MessageService, StorageService) {
 
     var msgOrigin = 'origem';
     var msgDestination = 'destino';
     var rideMap;
-    $scope.kml = true;
+    $scope.geojson;
 
     $scope.route = {
         origin: {}, 
@@ -62,6 +63,10 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
     }, function(err) {
         alert(MessageService.error.title, err);
     });
+    
+    $scope.downloadKML = function() {
+        GeoService.downloadKML($scope.geojson);
+    } 
         
     function findAddress(element, message) {        
         if (element.name) {
@@ -135,9 +140,11 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
         };
     }
     
+    // origem -23.54233, -46.64023
+    // destino -23.60185, -46.6607
     function drawRoute(route) {
         var route = new L.Polyline(L.PolylineUtil.decode(route, 6)); // OSRM polyline decoding
-
+        
         var boxes = L.RouteBoxer.box(route, 10);
         var bounds = new L.LatLngBounds([]);
         var boxpolys = new Array(boxes.length);
@@ -148,18 +155,18 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
 
         route.addTo(rideMap);
         rideMap.fitBounds(bounds);
-
+        
         return route;
     }
     
-    function routeToGeoJson(route) {
+    function routeToGeoJson(waypoints, latLngs) {
 		var wpNames = [],
 			wpCoordinates = [],
 			i,
 			wp;
 
-		for (i = 0; i < route.waypoints.length; i++) {
-			wp = route.waypoints[i];
+		for (i = 0; i < waypoints.length; i++) {
+			wp = waypoints[i];
 			wpNames.push(wp.name);
 			wpCoordinates.push([wp.coordinates[0], wp.coordinates[1]]);
 		}
@@ -183,20 +190,20 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
 					properties: {
 						id: 'line',
 					},
-					geometry: routeToLineString(route)
+					geometry: routeToLineString(latLngs)
 				}
 			]
 		};
 	}
     
-    function routeToLineString(route) {
+    function routeToLineString(latLngs) {
 		var lineCoordinates = [],
 			i,
-            wp;
+            lt;
 
-        for (i = 0; i < route.waypoints.length; i++) {
-            wp = route.waypoints[i];
-            lineCoordinates.push([wp.coordinates[0], wp.coordinates[1]]);
+        for (i = 0; i < latLngs.length; i++) {
+            lt = latLngs[i];
+            lineCoordinates.push([lt.lng, lt.lat]);
 		}
 
 		return {
@@ -206,12 +213,9 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
 	}
     
     function loadRoute(serverResult) {
-        ApplicationService.loadRoute(serverResult.properties.waypoints).then(function(result) {
-            drawRoute(result.route_geometry);
-            var geojson = routeToGeoJson(serverResult.properties);
-            var kml = tokml(geojson);
-            console.log(kml);
-            StorageService.add(geojson);
+        GeoService.loadRoute(serverResult.properties.waypoints).then(function(result) {
+            var route = drawRoute(result.route_geometry);
+            $scope.geojson = routeToGeoJson(serverResult.properties.waypoints, route.getLatLngs());
             displayRoute(serverResult);
         }, function(err) {
             alert(MessageService.error.title, err);
@@ -243,11 +247,10 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
         $scope.modal.show();
     }
     
-    // origem -23.54233, -46.64023
-    // destino -23.60185, -46.6607
     $scope.buildRoute = function() {
         ApplicationService.buildMapRoute($scope.route.origin, $scope.route.destination).then(function(result) {
             result.name = $scope.route.name;
+            StorageService.add(result);
             loadRoute(result);
             $scope.modal.hide();
         }, function(err) {
