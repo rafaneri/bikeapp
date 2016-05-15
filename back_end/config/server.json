@@ -1,6 +1,6 @@
 {
   "connection": {
-    "server": "54.200.242.200",
+    "server": "localhost",
     "port": 27017,
     "database": "app-test"
   },
