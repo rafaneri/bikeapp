@@ -2,7 +2,7 @@ angular
     .module('woole')
     .factory('ApplicationService', ['$http', '$q', function($http, $q) {
         return {
-            apiPath: 'http://192.168.0.10:3200/api',
+            apiPath: 'http://54.200.242.200:3200/api',
             buildMapRoute: function(o, d) {
                 var data = {o:o, d:d};
                 return this.buildPostRequest('/map', data, 'An error occured while fetching the route');
