@@ -1,0 +1,28 @@
+<ion-modal-view>
+    <ion-header-bar class="bar-dark">
+        <h1 class="title">Defina a rota</h1>
+        <div class="buttons">
+            <button class="button button-clear" ng-click="modal.hide()">Cancelar</button>
+        </div>
+    </ion-header-bar>
+    <ion-content class="padding">
+        <form name="routeForm" ng-submit="buildRoute()">
+            <div class="list">
+                <label class="item item-input">
+                    <input type="text" ng-blur="findOriginAddress()" ng-model="route.origin.name" placeholder="Qual o endereço de  origem?" ng-minlength="1" ng-maxlength="100" required>
+                </label>
+                <label class="item item-input">
+                    <input type="text" ng-blur="findDestinationAddress();" ng-model="route.destination.name" placeholder="Qual o endereço destino?" ng-minlength="1" ng-maxlength="100" required>
+                </label>
+                <label class="item item-input">
+                    <input type="text" ng-model="route.name" placeholder="Defina o nome da sua rota" ng-minlength="1" ng-maxlength="100" required>
+                </label>
+            </div>
+            <div class="padding">
+                <input type="hidden" ng-model="route.origin.latitude" required>
+                <input type="hidden" ng-model="route.destination.latitude" required>   
+                <button class="button button-block button-outline button-assertive" ng-disabled="routeForm.$invalid">gerar rota</button>
+            </div>
+        </form>
+    </ion-content>
+</ion-modal-view>

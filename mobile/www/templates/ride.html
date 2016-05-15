@@ -1,0 +1,12 @@
+<ion-view title="Pedalar">
+    <ion-nav-buttons side="left">
+        <button ng-click="openRouteModal();" class="button button-icon icon ion-ios-plus-outline"></button>
+    </ion-nav-buttons>
+
+    <!--<ion-nav-buttons side="right">
+        <button ng-click="downloadKML();" class="button button-icon icon ion-ios-cloud-download-outline"></button>
+    </ion-nav-buttons>-->
+    <ion-content data-tap-disabled="true">
+        <leaflet id="rideMap" defaults="map.defaults" center="map.center" markers="map.markers" ng-if="map"></leaflet>
+    </ion-content>
+</ion-view>
