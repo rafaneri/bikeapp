@@ -20,7 +20,7 @@ module.exports = function() {
             res.setHeader('Content-disposition', 'attachment; filename=route.kml');
             res.setHeader('Content-type', 'application/xml');
             res.charset = 'UTF-8';
-            res.write(result);
+            res.write(kml);
             res.end();
         }
     };
