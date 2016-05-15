@@ -20,4 +20,4 @@ function downloadKML(geojson) {
     return tokml(geojson);
 }
 
-module.exports = {searchAddress: searchAddress};
+module.exports = {searchAddress: searchAddress, downloadKML: downloadKML};
