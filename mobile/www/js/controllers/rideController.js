@@ -102,35 +102,35 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
         var waypoint = serverResult.properties.waypoints;
         $scope.map.center.lat  = waypoint[0].coordinates[1];
         $scope.map.center.lng = waypoint[0].coordinates[0];
-        $scope.map.center.zoom = 13;
+        $scope.map.center.zoom = 14;
         $scope.map.markers = {
             origin: {
                 lat:waypoint[0].coordinates[1],
                 lng:waypoint[0].coordinates[0],
                 focus: true,
                 draggable: false,            
-                title: 'Origem'  
+                title: 'Origem - ' + waypoint[0].name
             },
             p1: {
                 lat:waypoint[1].coordinates[1],
                 lng:waypoint[1].coordinates[0],
                 focus: true,
                 draggable: false,            
-                title: 'P1'  
+                title: 'P1 - ' + waypoint[1].name
             },
             p2: {
                 lat:waypoint[2].coordinates[1],
                 lng:waypoint[2].coordinates[0],
                 focus: true,
                 draggable: false,            
-                title: 'P2'
+                title: 'P2 - ' + waypoint[2].name
             },
             destination: {
                 lat:waypoint[3].coordinates[1],
                 lng:waypoint[3].coordinates[0],
                 focus: true,
                 draggable: false,            
-                title: 'Destino'  
+                title: 'Destino - ' + waypoint[3].name
             }, 
         };
     }
@@ -152,9 +152,66 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
         return route;
     }
     
+    function routeToGeoJson(route) {
+		var wpNames = [],
+			wpCoordinates = [],
+			i,
+			wp;
+
+		for (i = 0; i < route.waypoints.length; i++) {
+			wp = route.waypoints[i];
+			wpNames.push(wp.name);
+			wpCoordinates.push([wp.coordinates[0], wp.coordinates[1]]);
+		}
+
+		return {
+			type: 'FeatureCollection',
+			features: [
+				{
+					type: 'Feature',
+					properties: {
+						id: 'waypoints',
+						names: wpNames
+					},
+					geometry: {
+						type: 'MultiPoint',
+						coordinates: wpCoordinates
+					}
+				},
+				{
+					type: 'Feature',
+					properties: {
+						id: 'line',
+					},
+					geometry: routeToLineString(route)
+				}
+			]
+		};
+	}
+    
+    function routeToLineString(route) {
+		var lineCoordinates = [],
+			i,
+            wp;
+
+        for (i = 0; i < route.waypoints.length; i++) {
+            wp = route.waypoints[i];
+            lineCoordinates.push([wp.coordinates[0], wp.coordinates[1]]);
+		}
+
+		return {
+			type: 'LineString',
+			coordinates: lineCoordinates
+		};
+	}
+    
     function loadRoute(serverResult) {
         ApplicationService.loadRoute(serverResult.properties.waypoints).then(function(result) {
             drawRoute(result.route_geometry);
+            var geojson = routeToGeoJson(serverResult.properties);
+            var kml = tokml(geojson);
+            console.log(kml);
+            StorageService.add(geojson);
             displayRoute(serverResult);
         }, function(err) {
             alert(MessageService.error.title, err);
@@ -191,7 +248,6 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
     $scope.buildRoute = function() {
         ApplicationService.buildMapRoute($scope.route.origin, $scope.route.destination).then(function(result) {
             result.name = $scope.route.name;
-            StorageService.add(result);
             loadRoute(result);
             $scope.modal.hide();
         }, function(err) {
