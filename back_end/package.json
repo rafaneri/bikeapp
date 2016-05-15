@@ -1,0 +1,19 @@
+{
+  "name": "map_my_ride",
+  "version": "0.0.1",
+  "description": "Trace your route, pass through your favorite places",
+  "main": "app.js",
+  "author": "Rafael Neri",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "express": "^4.13.4",
+    "geographiclib": "^1.46.0",
+    "jsdom": "^9.0.0",
+    "leaflet-routing-machine": "^3.0.1",
+    "mongoose": "^4.4.16",
+    "node-geocoder": "^3.10.0",
+    "q": "^1.4.1",
+    "togeojson": "^0.13.0"
+  }
+}

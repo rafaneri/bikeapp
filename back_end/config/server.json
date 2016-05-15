@@ -1,0 +1,10 @@
+{
+  "connection": {
+    "server": "54.200.242.200",
+    "port": 27017,
+    "database": "app-test"
+  },
+  "app": {
+    "port": 3200
+  }
+}
