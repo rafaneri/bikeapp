@@ -16,16 +16,12 @@ module.exports = function() {
         },
         downloadKML: function(req, res, next) {
             var geojson = req.body;
-            
-            geo.downloadKML(geojson).then(function(result) {
-                res.setHeader('Content-disposition', 'attachment; filename=route.kml');
-                res.setHeader('Content-type', 'application/xml');
-                res.charset = 'UTF-8';
-                res.write(result);
-                res.end();
-            }, function(err) {
-                next(err);
-            })
+            var kml = geo.downloadKML(geojson);
+            res.setHeader('Content-disposition', 'attachment; filename=route.kml');
+            res.setHeader('Content-type', 'application/xml');
+            res.charset = 'UTF-8';
+            res.write(result);
+            res.end();
         }
     };
     
