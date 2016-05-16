@@ -142,8 +142,13 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
     
     // origem -23.54233, -46.64023
     // destino -23.60185, -46.6607
-    function drawRoute(route) {
-        var route = new L.Polyline(L.PolylineUtil.decode(route, 6)); // OSRM polyline decoding
+    function drawRoute(routeParams) {
+        // removendo layers geradas pelo polyline
+        rideMap.eachLayer(function (layer) {
+            if (layer._latlngs) rideMap.removeLayer(layer);
+        });
+        
+        var route = new L.Polyline(L.PolylineUtil.decode(routeParams, 6)); // OSRM polyline decoding
         
         var boxes = L.RouteBoxer.box(route, 10);
         var bounds = new L.LatLngBounds([]);
@@ -159,7 +164,7 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
         return route;
     }
     
-    function routeToGeoJson(waypoints, latLngs) {
+    function routeAddWayPoints(waypoints, geometry) {
 		var wpNames = [],
 			wpCoordinates = [],
 			i,
@@ -190,32 +195,16 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
 					properties: {
 						id: 'line',
 					},
-					geometry: routeToLineString(latLngs)
+					geometry: geometry
 				}
 			]
-		};
-	}
-    
-    function routeToLineString(latLngs) {
-		var lineCoordinates = [],
-			i,
-            lt;
-
-        for (i = 0; i < latLngs.length; i++) {
-            lt = latLngs[i];
-            lineCoordinates.push([lt.lng, lt.lat]);
-		}
-
-		return {
-			type: 'LineString',
-			coordinates: lineCoordinates
 		};
 	}
     
     function loadRoute(serverResult) {
         GeoService.loadRoute(serverResult.properties.waypoints).then(function(result) {
             var route = drawRoute(result.route_geometry);
-            $scope.geojson = routeToGeoJson(serverResult.properties.waypoints, route.getLatLngs());
+            $scope.geojson = routeAddWayPoints(serverResult.properties.waypoints, route.toGeoJSON().geometry);
             displayRoute(serverResult);
         }, function(err) {
             alert(MessageService.error.title, err);
@@ -229,11 +218,6 @@ function RideController($scope, $q, $cordovaGeolocation, $stateParams, $ionicMod
     $scope.findDestinationAddress = function() {
         findAddress($scope.route.destination, msgDestination);
     };
-    
-    $scope.coordinatesExists = function() {
-        console.log($scope.route.origin.lat != undefined && $scope.route.destination.lat != undefined);
-        return $scope.route.origin.lat != undefined && $scope.route.destination.lat != undefined;
-    }
     
     // load route modal
     $ionicModal.fromTemplateUrl('templates/build-route.html', {
