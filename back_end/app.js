@@ -1,5 +1,6 @@
 var express = require('express'),
     app = express(),
+    path = require('path'),
     bodyParser = require('body-parser'),
     maproute = require('./routes/map'),
     georoute = require('./routes/geo');
