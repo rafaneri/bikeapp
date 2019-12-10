@@ -11,7 +11,7 @@
     "geographiclib": "^1.46.0",
     "jsdom": "^9.0.0",
     "leaflet-routing-machine": "^3.0.1",
-    "mongoose": "^4.4.16",
+    "mongoose": "^5.8.0",
     "node-geocoder": "^3.10.0",
     "q": "^1.4.1",
     "togeojson": "^0.13.0"
